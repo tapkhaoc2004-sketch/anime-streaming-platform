@@ -38,11 +38,12 @@ jobs:
         cd backend
         npm install
 
-     - name: Run Build Check
-       run: |
-        cd backend
-        node server.js &
-        sleep 5
-        curl http://localhost:8080/health
+     - name: Run server abd test health
        env:
         DATABASE_URL: postgres://admin:loveyouforever@localhost:5432/anime_db
+        PORT: 8080
+       run: |
+        cd backend
+        npm start &
+        sleep 10
+        curl --fail http://localhost:8080/health

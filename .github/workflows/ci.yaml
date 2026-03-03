@@ -1,0 +1,48 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:18.3-alpine3.23
+        env:
+          POSTGRES_USER: admin
+          POSTGRES_PASSWORD: loveyouforever
+          POSTGRES_DB: anime_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U admin -d anime_db"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+     - name: Checkout code
+       uses: actions/checkout@v4
+
+     - name: Setup Node
+       uses: actions/setup-node@v4
+       with:
+        node-version: '20'
+
+     - name: Install Depencies
+       run: |
+        cd backend
+        npm install
+
+     - name: Run Build Check
+       run: |
+        cd backend
+        node server.js &
+        sleep 5
+        curl http://localhost:8080/health
+       env:
+        DATABASE_URL: postgres://admin:loveyouforever@localhost:5432/anime_db
